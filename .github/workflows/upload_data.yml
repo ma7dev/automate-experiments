@@ -26,7 +26,7 @@ jobs:
             console.log(issue_number)
             let best_record = JSON.stringify(fs.readFileSync('./pr/best_record.json'));
             console.log(best_record)
-            const job = best_record
+            const jobs = best_record
             const d = jobs.reduce((obj, job) => {
               Object.keys(job).map((j) => {
                 if (!obj[j]) {
