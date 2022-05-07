@@ -29,11 +29,12 @@ jobs:
             const d = best_record
             const keys = Object.keys(d)
 
-            let readme = `| Field | Value |\n|-------|-------|\n`
+            let readme = ``
 
             keys.map((key) => {
               readme += `| ${key} | ${d[key]} |\n `
             })
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
