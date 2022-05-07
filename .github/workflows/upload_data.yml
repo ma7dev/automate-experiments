@@ -26,7 +26,8 @@ jobs:
             console.log(issue_number)
             let best_record = fs.readFileSync('./pr/best_record.json');
             console.log(best_record)
-            const keys = Object.keys(best_record)
+            let d = best_record
+            const keys = Object.keys(d)
 
             let readme = `
                 | Field | Type | Value |
