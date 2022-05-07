@@ -26,15 +26,7 @@ jobs:
             console.log(issue_number)
             let best_record = JSON.parse(fs.readFileSync('./pr/best_record.json'));
             console.log(best_record)
-            const jobs = best_record
-            # const d = jobs.reduce((obj, job) => {
-            #   Object.keys(job).map((j) => {
-            #     if (!obj[j]) {
-            #       obj[j] = job[j]
-            #     }
-            #   })
-            #   return obj
-            # }, {})
+            const d = best_record
             const keys = Object.keys(d)
 
             let readme = `
