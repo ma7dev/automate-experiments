@@ -29,9 +29,7 @@ jobs:
             const d = best_record
             const keys = Object.keys(d)
 
-            let readme = `
-                | Field | Type | Value |
-                |-------|------|-------|
+            let readme = `| Field | Type | Value |\n|-------|------|-------|\n`
             `
 
             keys.map((key) => {
