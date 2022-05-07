@@ -20,7 +20,7 @@ jobs:
                run_id: context.payload.workflow_run.id,
             });
             let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "pr_number"
+              return artifact.name == "pr_artifact"
             })[0];
             let download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
@@ -41,9 +41,10 @@ jobs:
           script: |
             let fs = require('fs');
             let issue_number = Number(fs.readFileSync('./pr_number'));
+            let best_record = Number(fs.readFileSync('./best_record.json'));
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: 'Thank you for the PR!'
+              body: best_record
             });

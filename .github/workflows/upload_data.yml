@@ -14,7 +14,8 @@ jobs:
         run: |
           mkdir -p ./pr
           echo $PR_NUMBER > ./pr/pr_number
+          echo '{"train accuracy": 94.42, "test accuracy": 98.33, "train loss": 0.0029, "test loss": 0.3609}' > ./pr/best_record.json
       - uses: actions/upload-artifact@v3
         with:
-          name: pr_number
+          name: pr_artifact
           path: pr/
