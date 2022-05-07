@@ -15,7 +15,7 @@ jobs:
           mkdir -p ./pr
           echo $PR_NUMBER > ./pr/pr_number
           echo $PR_NUMBER
-          echo '{"train accuracy": 94.42, "test accuracy": 98.33, "train loss": 0.0029, "test loss": 0.3609}' > ./pr/best_record.json
+          echo '{"train accuracy": "94.42", "test accuracy": "98.33", "train loss": "0.0029", "test loss": "0.3609"}' > ./pr/best_record.json
 
       - name: 'Comment on PR'
         uses: actions/github-script@v6
