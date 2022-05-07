@@ -26,21 +26,21 @@ jobs:
             console.log(issue_number)
             let best_record = JSON.stringify(fs.readFileSync('./pr/best_record.json'));
             console.log(best_record)
-            # let d = best_record
-            # const keys = Object.keys(d)
+            let d = best_record
+            const keys = Object.keys(d)
 
-            # let readme = `
-            #     | Field | Type | Value |
-            #     |-------|------|-------|
-            # `
+            let readme = `
+                | Field | Type | Value |
+                |-------|------|-------|
+            `
 
-            # keys.map((key) => {
-            #   readme += `| ${key} | ${typeof d[key]} | ${d[key]} |\n `
-            # })
+            keys.map((key) => {
+              readme += `| ${key} | ${typeof d[key]} | ${d[key]} |\n `
+            })
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: best_record
+              body: readme
             })
