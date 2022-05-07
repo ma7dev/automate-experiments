@@ -24,12 +24,12 @@ jobs:
             let fs = require('fs');
             let issue_number = Number(fs.readFileSync('./pr/pr_number'));
             console.log(issue_number)
-            // let best_record = fs.readFileSync('./pr/best_record.json');
-            // console.log(best_record)
+            let best_record = fs.readFileSync('./pr/best_record.json');
+            console.log(best_record)
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: 'train accuracy 94.42'
+              body: best_record
             })
