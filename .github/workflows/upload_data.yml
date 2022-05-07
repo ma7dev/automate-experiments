@@ -58,5 +58,10 @@ jobs:
               repo: context.repo.repo,
               //issue_number: issue_number,
               issue_number: ${{ github.event.number }},
-              body: '{"train accuracy": 94.42, "test accuracy": 98.33, "train loss": 0.0029, "test loss": 0.3609}'
+              body: '
+                    |train accuracy| 94.42|
+                    |test accuracy| 98.33|
+                    |train loss| 0.0029|
+                    |test loss": 0.3609|
+                  '
             });
