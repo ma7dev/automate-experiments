@@ -15,7 +15,7 @@ jobs:
           mkdir -p ./pr
           echo $PR_NUMBER > ./pr/pr_number
           echo $PR_NUMBER
-          echo '{"train_accuracy": "94.42", "test_accuracy": "98.33", "train_loss": "0.0029", "test_loss": "0.3609"}' > ./pr/best_record.json
+          echo '{"train accuracy": "94.42", "test accuracy": "98.33", "train loss": "0.0029", "test loss": "0.3609"}' > ./pr/best_record.json
 
       - name: 'Comment on PR'
         uses: actions/github-script@v6
@@ -24,12 +24,31 @@ jobs:
             let fs = require('fs');
             let issue_number = Number(fs.readFileSync('./pr/pr_number'));
             console.log(issue_number)
-            let best_record = JSON.stringify(fs.readFileSync('./pr/best_record.json'));
+            let best_record = JSON.parse(fs.readFileSync('./pr/best_record.json'));
             console.log(best_record)
+            const jobs = best_record
+            const d = jobs.reduce((obj, job) => {
+              Object.keys(job).map((j) => {
+                if (!obj[j]) {
+                  obj[j] = job[j]
+                }
+              })
+              return obj
+            }, {})
+            const keys = Object.keys(d)
+
+            let readme = `
+                | Field | Type | Value |
+                |-------|------|-------|
+            `
+
+            keys.map((key) => {
+              readme += `| ${key} | ${typeof d[key]} | ${d[key]} |\n `
+            })
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: "readme"
+              body: readme
             })
