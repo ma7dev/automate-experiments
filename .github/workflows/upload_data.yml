@@ -9,11 +9,12 @@ jobs:
 
     steps:
       - name: Save PR number
-        env:
-          PR_NUMBER: ${{ github.event.number }}
+        # env:
+        #   PR_NUMBER: ${{ github.event.number }}
         run: |
           mkdir -p ./pr
           echo $PR_NUMBER > ./pr/pr_number
+          # echo 2 > ./pr/pr_number
           echo '{"train accuracy": 94.42, "test accuracy": 98.33, "train loss": 0.0029, "test loss": 0.3609}' > ./pr/best_record.json
 
       - name: 'Comment on PR'
@@ -23,8 +24,8 @@ jobs:
           script: |
             let fs = require('fs');
             let issue_number = Number(fs.readFileSync('./pr/pr_number'));
-            let best_record = fs.readFileSync('./pr/best_record.json');
-            console.log(best_record)
+            // let best_record = fs.readFileSync('./pr/best_record.json');
+            // console.log(best_record)
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
