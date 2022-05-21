@@ -22,9 +22,6 @@ on:
       - 'docs/**'
       - '**.md'
       - README.md
-  # (below) re-run the ci every midnight
-  # schedule:
-  #   - cron:  "0 0 * * *"
 
 jobs:
   tests:
