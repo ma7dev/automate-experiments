@@ -1,4 +1,4 @@
-name: agi_dev
+name: homebrewnlp_jax_dev
 channels:
   - defaults
   - conda-forge

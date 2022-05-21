@@ -69,7 +69,7 @@ jobs:
           source $CONDA_PATH/etc/profile.d/conda.sh
 
           echo "Activating environment..."
-          conda activate agi_dev
+          conda activate homebrewnlp_jax_dev
 
           echo "Running tests..."
           python -m pytest tests

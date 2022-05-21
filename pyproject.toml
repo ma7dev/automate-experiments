@@ -1,13 +1,17 @@
 [tool.poetry]
-name = "agi"
-version = "10000.0.0"
-description = "Next big thing - Donald Trump"
+name = "homebrewnlp_jax"
+version = "0.0.1"
+# TODO: 
+description = ""
 license = "MIT"
+# TODO: 
 authors = [
-    "Elon Musk <elon.musk@gmail.com>"
+    "First Last <first.last@gmail.com>",
 ]
 readme = 'README.md'
+# TODO: 
 homepage = "https://github.com/sudomaze/automate-experiments"
+# TODO: 
 repository = "https://github.com/sudomaze/automate-experiments"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
