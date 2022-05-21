@@ -13,27 +13,17 @@ on:
   #   - cron:  "0 0 * * *"
 
 jobs:
-  tests:
+  exps:
     if: ${{ github.event.label.name == 'exp' }}
     runs-on: tpu-machine
     steps:
-      - name: Set up miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-activate-base: true
-          auto-update-conda: true
-          python-version: "3.9"
-          activate-environment: true
-          miniconda-version: 'latest'
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Print conda & python path and version
         run : |
           echo "Setting conda init..."
-          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
-          source $CONDA_PATH/etc/profile.d/conda.sh
+          source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
 
           echo "Outputting information..."
           which conda
@@ -44,8 +34,7 @@ jobs:
       - name: Create environment and install packages
         run: |
           echo "Setting conda init..."
-          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
-          source $CONDA_PATH/etc/profile.d/conda.sh
+          source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
 
           echo "Running install script..."
           ./install.sh

@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-      - feat/*
-      - fix/*
+      - feat/**
+      - fix/**
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -16,8 +16,8 @@ on:
       - reopened
     branches:
       - main
-      - feat/*
-      - fix/*
+      - feat/**
+      - fix/**
     paths-ignore:
       - 'docs/**'
       - '**.md'
