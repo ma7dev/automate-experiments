@@ -30,6 +30,7 @@ while test $# -gt 0; do
     esac
 done
 
+# environment setup
 env_name=$ENV_DEFAULT
 file_name="environment.yml"
 if [ "$dev" == true ]; then
