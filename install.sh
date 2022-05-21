@@ -64,7 +64,7 @@ default_install() {
     python -m poetry install
 
     echo "Install pre-commit..."
-    python -m pre-commit install
+    pre-commit install
 }
 
 default_install $env_name $file_name
