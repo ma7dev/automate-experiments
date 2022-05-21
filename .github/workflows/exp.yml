@@ -15,7 +15,7 @@ on:
 jobs:
   tests:
     if: ${{ github.event.label.name == 'exp' }}
-    runs-on: power-machine
+    runs-on: tpu-machine
     steps:
       - name: Set up miniconda
         uses: conda-incubator/setup-miniconda@v2
