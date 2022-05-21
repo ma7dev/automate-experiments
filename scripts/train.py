@@ -5,11 +5,13 @@ import pickle
 
 import matplotlib.pyplot as plt
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
-from agi.model import AGINet
 from torchvision.datasets import MNIST
+
+from homebrewnlp_jax.model import AGINet
 
 
 def read_args():
@@ -40,7 +42,7 @@ def read_args():
     return args
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def train(args, model, device, train_loader, optimizer, epoch, overfit=False):
     history = {
         "loss": 0,
         "accuracy": 0,
@@ -53,19 +55,20 @@ def train(args, model, device, train_loader, optimizer, epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+        pred = output.argmax(dim=1, keepdim=True)
         history["loss"] += loss.item()
-        history["accuracy"] += (output.argmax(dim=1) == target).sum().item()
+        history["accuracy"] += pred.eq(target.view_as(pred)).sum().item()
         if batch_idx % args.log_interval == 0:
             print(
                 f"[Train] Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)}]"
                 f"({100. * batch_idx / len(train_loader):.0f}%)\tLoss: {loss.item():.6f}"
             )
-    history["loss"] = round(history["loss"] / len(train_loader.dataset), 4)
-    history["accuracy"] = round((history["accuracy"] / len(train_loader.dataset)) * 100.0, 2)
+        history["loss"] = round(history["loss"] / len(train_loader.dataset), 4)
+        history["accuracy"] = round((history["accuracy"] / len(train_loader.dataset)) * 100.0, 2)
     return history
 
 
-def test(args, model, device, test_loader):
+def test(args, model, device, test_loader, overfit=False):
     history = {
         "loss": 0,
         "accuracy": 0,
@@ -81,14 +84,14 @@ def test(args, model, device, test_loader):
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
             history["loss"] += test_loss
-            history["accuracy"] += (output.argmax(dim=1) == target).sum().item()
-    test_loss /= len(test_loader.dataset)
-    print(
-        f"[Test] Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)}"
-        f"({100.0 * correct / len(test_loader.dataset):.0f}%)\n"
-    )
-    history["loss"] = round(history["loss"] / len(test_loader.dataset), 4)
-    history["accuracy"] = round((history["accuracy"] / len(test_loader.dataset)) * 100.0, 2)
+            history["accuracy"] += pred.eq(target.view_as(pred)).sum().item()
+        test_loss /= len(test_loader.dataset)
+        print(
+            f"[Test] Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)}"
+            f"({100.0 * correct / len(test_loader.dataset):.0f}%)\n"
+        )
+        history["loss"] = round(history["loss"] / len(test_loader.dataset), 4)
+        history["accuracy"] = round((history["accuracy"] / len(test_loader.dataset)) * 100.0, 2)
     return history
 
 
@@ -125,52 +128,84 @@ def main():
         os.mkdir(output_path)
 
     args = read_args()
-    history = None
+    history = {"train": [], "test": []}
     if not args.load_history:
         use_cuda = not args.no_cuda and torch.cuda.is_available()
         device = torch.device("cuda" if use_cuda else "cpu")
         kwargs = {"num_workers": 1, "pin_memory": True} if use_cuda else {}
-        train_loader = torch.utils.data.DataLoader(
-            MNIST(
+        model = AGINet().to(device)
+        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+        if args.load_model:
+            model.load_state_dict(torch.load("mnist_cnn.pth"))
+        if not args.overfit:
+            train_loader = torch.utils.data.DataLoader(
+                MNIST(
+                    "../data",
+                    train=True,
+                    download=True,
+                    transform=torchvision.transforms.Compose(
+                        [torchvision.transforms.ToTensor(), torchvision.transforms.Normalize((0.1307,), (0.3081,))]
+                    ),
+                ),
+                batch_size=args.batch_size,
+                shuffle=True,
+                **kwargs,
+            )
+            test_loader = torch.utils.data.DataLoader(
+                MNIST(
+                    "../data",
+                    train=False,
+                    transform=torchvision.transforms.Compose(
+                        [torchvision.transforms.ToTensor(), torchvision.transforms.Normalize((0.1307,), (0.3081,))]
+                    ),
+                ),
+                batch_size=args.test_batch_size,
+                shuffle=False,
+                **kwargs,
+            )
+            for epoch in range(1, args.epochs + 1):
+                train_history = train(args, model, device, train_loader, optimizer, epoch)
+                test_history = test(args, model, device, test_loader)
+                history["train"].append(train_history)
+                history["test"].append(test_history)
+        else:
+            small_set = MNIST(
                 "../data",
                 train=True,
                 download=True,
                 transform=torchvision.transforms.Compose(
                     [torchvision.transforms.ToTensor(), torchvision.transforms.Normalize((0.1307,), (0.3081,))]
                 ),
-            ),
-            batch_size=args.batch_size,
-            shuffle=True,
-            **kwargs,
-        )
-        test_loader = torch.utils.data.DataLoader(
-            MNIST(
-                "../data",
-                train=False,
-                transform=torchvision.transforms.Compose(
-                    [torchvision.transforms.ToTensor(), torchvision.transforms.Normalize((0.1307,), (0.3081,))]
-                ),
-            ),
-            batch_size=args.test_batch_size,
-            shuffle=False,
-            **kwargs,
-        )
-        model = AGINet().to(device)
-        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-        if args.load_model:
-            model.load_state_dict(torch.load("mnist_cnn.pth"))
-        history = {"train": [], "test": []}
-        for epoch in range(1, args.epochs + 1):
-            train_history = train(args, model, device, train_loader, optimizer, epoch)
-            test_history = test(args, model, device, test_loader)
-            history["train"].append(train_history)
-            history["test"].append(test_history)
+            )
+            small_set.data = small_set.data[: args.batch_size]
+            small_set.targets = small_set.targets[: args.batch_size]
+            for m in model.modules():
+                if isinstance(m, nn.BatchNorm2d):
+                    m.eval()
+            train_loader = torch.utils.data.DataLoader(
+                small_set,
+                batch_size=args.batch_size,
+                shuffle=False,
+                **kwargs,
+            )
+            test_loader = torch.utils.data.DataLoader(
+                small_set,
+                batch_size=args.batch_size,
+                shuffle=False,
+                **kwargs,
+            )
+            for epoch in range(1, args.epochs + 1):
+                train_history = train(args, model, device, train_loader, optimizer, epoch)
+                test_history = test(args, model, device, test_loader)
+                history["train"].append(train_history)
+                history["test"].append(test_history)
         with open(f"{output_path}/history.pkl", "wb") as f:
             pickle.dump(history, f)
     else:
         with open(f"{output_path}/history.pkl", "rb") as f:
             history = pickle.load(f)
-    print(history)
+    print(history["train"][-1]["accuracy"])
+    print(history["test"][-1]["accuracy"])
     save_history_as_figure(history["train"], output_path, "train")
     save_history_as_figure(history["test"], output_path, "test")
     save_best(history, output_path)
