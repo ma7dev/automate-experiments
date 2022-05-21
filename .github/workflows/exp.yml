@@ -1,0 +1,100 @@
+name: Automate Experiments
+
+on:
+  pull_request:
+    types:
+      - labeled
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - README.md
+  # (below) re-run the ci every midnight
+  # schedule:
+  #   - cron:  "0 0 * * *"
+
+jobs:
+  tests:
+    if: ${{ github.event.label.name == 'exp' }}
+    runs-on: tpu-machine
+    steps:
+      - name: Set up miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: true
+          auto-update-conda: true
+          python-version: "3.9"
+          activate-environment: true
+          miniconda-version: 'latest'
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Print conda & python path and version
+        run : |
+          echo "Setting conda init..."
+          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
+          source $CONDA_PATH/etc/profile.d/conda.sh
+
+          echo "Outputting information..."
+          which conda
+          which python
+          python --version
+          conda --version
+
+      - name: Create environment and install packages
+        run: |
+          echo "Setting conda init..."
+          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
+          source $CONDA_PATH/etc/profile.d/conda.sh
+
+          echo "Running install script..."
+          ./install.sh
+
+      - name: Run train
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo "Setting conda init..."
+          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
+          source $CONDA_PATH/etc/profile.d/conda.sh
+
+          echo "Activating environment..."
+          conda activate agi
+
+          echo "Run training..."
+          cd scripts
+          python train.py --overfit
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr
+          echo $PR_NUMBER > ./pr/pr_number
+          mv ./logs/*.png  ./pr
+          mv ./logs/*.json ./pr
+
+      - name: 'Comment on PR'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let fs = require('fs');
+            let issue_number = Number(fs.readFileSync('./pr/pr_number'));
+            console.log(issue_number)
+            let best_record = JSON.parse(fs.readFileSync('./pr/best_record.json'));
+            console.log(best_record)
+            const d = best_record
+            const keys = Object.keys(d)
+
+            let readme = `| Key | Value |\n|-------|-------|\n`
+
+            keys.map((key) => {
+              readme += `| ${key} | ${d[key]} |\n `
+            })
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: readme
+            })

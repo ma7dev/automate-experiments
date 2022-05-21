@@ -8,9 +8,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
-from torchvision.datasets import MNIST
-
 from agi.model import AGINet
+from torchvision.datasets import MNIST
 
 
 def read_args():

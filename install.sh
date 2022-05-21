@@ -1,7 +1,9 @@
 #!/bin/bash
-# Usage: ./install.sh  # agi
-# Usage: ./install.sh --dev # agi_dev
+# Usage: ./install.sh  # homebrewnlp_jax
+# Usage: ./install.sh --dev # homebrewnlp_jax_dev
 
+ENV_DEFAULT="homebrewnlp_jax"
+DEV_ENV_DEFAULT="homebrewnlp_jax_dev"
 
 # arguments handling
 dev=false
@@ -28,10 +30,10 @@ while test $# -gt 0; do
     esac
 done
 
-env_name="agi"
+env_name=$ENV_DEFAULT
 file_name="environment.yml"
 if [ "$dev" == true ]; then
-    env_name="agi_dev"
+    env_name=$DEV_ENV_DEFAULT
     file_name="dev_environment.yml"
 fi
 
@@ -61,6 +63,8 @@ default_install() {
     echo "Installing dependencies using poetry..."
     python -m poetry install
 
+    echo "Install pre-commit..."
+    pre-commit install
 }
 
 default_install $env_name $file_name

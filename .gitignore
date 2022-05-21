@@ -1,3 +1,6 @@
-.vscode
-
+# project
 scripts/logs
+
+# development
+.vscode
+poetry.lock

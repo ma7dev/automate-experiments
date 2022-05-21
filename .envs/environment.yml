@@ -1,4 +1,4 @@
-name: agi
+name: homebrewnlp_jax
 channels:
   - defaults
   - conda-forge
@@ -6,4 +6,3 @@ channels:
 dependencies:
   - python=3.8
   - poetry
-  - cudatoolkit
