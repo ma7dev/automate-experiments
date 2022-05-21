@@ -13,4 +13,4 @@
     * Examples:
         * `feat/sudomaze/train/speedup_training`: this branch is for a `feature` by `sudomaze` for `train` component (`speedup_training`).
         * `fix/sudomaze/unit_tests/different_hardware_setup`: this branch is for a `fix` for a bug by `sudomaze` for `unit tests` component (`different hardware setup`).
-7. Make a PR with a detailed description of the changes based on the suggested template on GitHub. 
+7. Make a PR with a detailed description of the changes based on the suggested template on GitHub.

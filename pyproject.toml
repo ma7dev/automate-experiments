@@ -1,17 +1,17 @@
 [tool.poetry]
 name = "homebrewnlp_jax"
 version = "0.0.1"
-# TODO: 
+# TODO:
 description = ""
 license = "MIT"
-# TODO: 
+# TODO:
 authors = [
     "First Last <first.last@gmail.com>",
 ]
 readme = 'README.md'
-# TODO: 
+# TODO:
 homepage = "https://github.com/sudomaze/automate-experiments"
-# TODO: 
+# TODO:
 repository = "https://github.com/sudomaze/automate-experiments"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",

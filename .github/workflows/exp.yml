@@ -1,21 +1,9 @@
-name: Run tests
+name: Automate Experiments
 
 on:
-  push:
-    branches:
-      - main
-      - dev/*
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - README.md
   pull_request:
     types:
-      - opened
-      - reopened
-    branches:
-      - main
-      - dev/*
+      - labeled
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -26,7 +14,8 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    if: ${{ github.event.label.name == 'exp' }}
+    runs-on: power-machine
     steps:
       - name: Set up miniconda
         uses: conda-incubator/setup-miniconda@v2
@@ -52,7 +41,6 @@ jobs:
           python --version
           conda --version
 
-
       - name: Create environment and install packages
         run: |
           echo "Setting conda init..."
@@ -60,16 +48,53 @@ jobs:
           source $CONDA_PATH/etc/profile.d/conda.sh
 
           echo "Running install script..."
-          ./install.sh --dev
+          ./install.sh
 
-      - name: Run tests
+      - name: Run train
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
           echo "Setting conda init..."
           CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
           source $CONDA_PATH/etc/profile.d/conda.sh
 
           echo "Activating environment..."
-          conda activate agi_dev
+          conda activate agi
 
-          echo "Running tests..."
-          python -m pytest tests
+          echo "Run training..."
+          cd scripts
+          python train.py --overfit
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr
+          echo $PR_NUMBER > ./pr/pr_number
+          mv ./logs/*.png  ./pr
+          mv ./logs/*.json ./pr
+        
+      - name: 'Comment on PR'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let fs = require('fs');
+            let issue_number = Number(fs.readFileSync('./pr/pr_number'));
+            console.log(issue_number)
+            let best_record = JSON.parse(fs.readFileSync('./pr/best_record.json'));
+            console.log(best_record)
+            const d = best_record
+            const keys = Object.keys(d)
+
+            let readme = `| Key | Value |\n|-------|-------|\n`
+
+            keys.map((key) => {
+              readme += `| ${key} | ${d[key]} |\n `
+            })
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: readme
+            })
